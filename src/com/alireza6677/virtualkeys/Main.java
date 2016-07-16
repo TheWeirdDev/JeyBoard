@@ -2,6 +2,7 @@ package com.alireza6677.virtualkeys;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.Event;
@@ -20,6 +21,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
 import java.io.IOException;
@@ -50,11 +52,17 @@ import javax.swing.border.EmptyBorder;
 import com.alireza6677.virtualkeys.ui.VirtualButton;
 import com.alireza6677.virtualkeys.util.Prefs;
 import com.alireza6677.virtualkeys.util.Virtualizer;
+import com.alireza6677.virtualkeys.util.Virtualizer.ButtonStates;
+import com.alireza6677.virtualkeys.util.Virtualizer.lockingStateChangeListener;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.SwingDispatchService;
+
 import javax.swing.event.ChangeEvent;
 import javax.swing.JButton;
 import java.awt.Component;
@@ -70,6 +78,8 @@ public class Main extends JFrame {
 	private SystemTray tray;
 	private static Prefs p;
 	private Virtualizer vt;
+	private ImageIcon green;
+	private ImageIcon red;
 
 	/**
 	 * Launch the application.
@@ -196,11 +206,12 @@ public class Main extends JFrame {
 		// initTray();
 		setAlwaysOnTop(true);
 		setResizable(false);
+		setFocusable(false);
+		setFocusableWindowState(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1090, 365);
+		setBounds(100, 100, 1090, 342);
 
-		vt = Virtualizer.getInstance();
-		
+
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
@@ -381,6 +392,14 @@ public class Main extends JFrame {
 
 			}
 		});
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				vt.shutdownVirtualizer();
+				super.windowClosing(e);
+			}
+
+		});
 		mnNewMenu_1.add(chckbxmntmExpand);
 
 		JMenu mnNewMenu_2 = new JMenu("Help");
@@ -393,23 +412,26 @@ public class Main extends JFrame {
 		mntmAbout.addActionListener(e -> JOptionPane.showMessageDialog(this, " Virtual Keyboard v1.0"));
 
 		mnNewMenu_2.add(mntmAbout);
-		
+
 		Component glue = Box.createGlue();
 		menuBar.add(glue);
+
+		green = new ImageIcon(Main.class.getResource("/img/green_icon.png"));
+		red = new ImageIcon(Main.class.getResource("/img/red_icon.png"));
 		
 		JLabel lblNewLabel_2 = new JLabel("NumLock");
 		lblNewLabel_2.setFont(new Font("Dialog", Font.PLAIN, 11));
-		lblNewLabel_2.setIcon(new ImageIcon(Main.class.getResource("/img/green_icon.png")));
+		lblNewLabel_2.setIcon(green);
 		menuBar.add(lblNewLabel_2);
-		
+
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		menuBar.add(horizontalStrut);
-		
-		JLabel lblNewLabel_1 = new JLabel("Caps");
-		lblNewLabel_1.setFont(new Font("Dialog", Font.PLAIN, 11));
-		lblNewLabel_1.setIcon(new ImageIcon(Main.class.getResource("/img/green_icon.png")));
-		menuBar.add(lblNewLabel_1);
-		
+
+		JLabel lblcaps = new JLabel("Caps");
+		lblcaps.setFont(new Font("Dialog", Font.PLAIN, 11));
+		lblcaps.setIcon(green);
+		menuBar.add(lblcaps);
+
 		Component horizontalStrut_1 = Box.createHorizontalStrut(20);
 		menuBar.add(horizontalStrut_1);
 		contentPane = new JPanel();
@@ -493,9 +515,9 @@ public class Main extends JFrame {
 		psebrk.setFont(new Font("Dialog", Font.PLAIN, 12));
 		psebrk.setMargin(new Insets(0, 0, 0, 0));
 
-		VirtualButton button = new VirtualButton("~");
-		button.setNormalText("`");
-		button.setText("`");
+		VirtualButton btnoem3 = new VirtualButton("~");
+		btnoem3.setNormalText("`");
+		btnoem3.setText("`");
 
 		VirtualButton button_1 = new VirtualButton("1");
 		button_1.setTextByShift("!");
@@ -524,17 +546,17 @@ public class Main extends JFrame {
 		VirtualButton button_9 = new VirtualButton("9");
 		button_9.setTextByShift("(");
 
-		VirtualButton button_10 = new VirtualButton("0");
-		button_10.setTextByShift(")");
+		VirtualButton button_0 = new VirtualButton("0");
+		button_0.setTextByShift(")");
 
-		VirtualButton button_11 = new VirtualButton("-");
-		button_11.setTextByShift("_");
+		VirtualButton btn_dash = new VirtualButton("-");
+		btn_dash.setTextByShift("_");
 
-		VirtualButton button_12 = new VirtualButton("=");
-		button_12.setTextByShift("+");
+		VirtualButton btn_eq = new VirtualButton("=");
+		btn_eq.setTextByShift("+");
 
-		VirtualButton button_13 = new VirtualButton("\\");
-		button_13.setTextByShift("|");
+		VirtualButton btnBSlash = new VirtualButton("\\");
+		btnBSlash.setTextByShift("|");
 
 		VirtualButton btnBackspace = new VirtualButton("");
 		btnBackspace.setToolTipText("BackSpace");
@@ -568,17 +590,19 @@ public class Main extends JFrame {
 
 		VirtualButton btnP = new VirtualButton("p");
 
-		VirtualButton button_26 = new VirtualButton("[");
-		button_26.setTextByShift("{");
+		VirtualButton btnBracket = new VirtualButton("[");
+		btnBracket.setTextByShift("{");
 
-		VirtualButton button_27 = new VirtualButton("]");
-		button_27.setTextByShift("}");
+		VirtualButton btnCBracket = new VirtualButton("]");
+		btnCBracket.setTextByShift("}");
 
-		VirtualButton button_28 = new VirtualButton("");
-		button_28.setToolTipText("Right Click Menu");
-		button_28.setIcon(new ImageIcon(Main.class.getResource("/img/contextMenuCursor.png")));
+		VirtualButton btnContext = new VirtualButton("");
+		btnContext.setToolTipText("Right Click Menu");
+		btnContext.setIcon(new ImageIcon(Main.class.getResource("/img/contextMenuCursor.png")));
 
 		VirtualButton btnCaps = new VirtualButton("Caps");
+		btnCaps.setText("Caps Lock");
+		btnCaps.setNormalText("Caps Lock");
 		btnCaps.setTextByShift("");
 		btnCaps.setHorizontalAlignment(SwingConstants.LEFT);
 
@@ -590,21 +614,21 @@ public class Main extends JFrame {
 
 		VirtualButton btnF = new VirtualButton("f");
 
-		VirtualButton btnH = new VirtualButton("g");
+		VirtualButton btnG = new VirtualButton("g");
 
-		VirtualButton btnH_1 = new VirtualButton("h");
+		VirtualButton btnH = new VirtualButton("h");
 
-		VirtualButton btnI_1 = new VirtualButton("j");
+		VirtualButton btnJ = new VirtualButton("j");
 
 		VirtualButton btnK = new VirtualButton("k");
 
 		VirtualButton btnL = new VirtualButton("l");
 
-		VirtualButton button_39 = new VirtualButton(";");
-		button_39.setTextByShift(":");
+		VirtualButton btnSemiColon = new VirtualButton(";");
+		btnSemiColon.setTextByShift(":");
 
-		VirtualButton button_40 = new VirtualButton("'");
-		button_40.setTextByShift("\"");
+		VirtualButton btnQoute = new VirtualButton("'");
+		btnQoute.setTextByShift("\"");
 
 		VirtualButton btnEnter = new VirtualButton("Enter");
 		btnEnter.addActionListener(new ActionListener() {
@@ -632,17 +656,17 @@ public class Main extends JFrame {
 
 		VirtualButton btnB = new VirtualButton("b");
 
-		VirtualButton button_49 = new VirtualButton(",");
-		button_49.setTextByShift("<");
+		VirtualButton btnComma = new VirtualButton(",");
+		btnComma.setTextByShift("<");
 
 		VirtualButton btnM = new VirtualButton("m");
 		btnM.setToolTipText("");
 
-		VirtualButton button_51 = new VirtualButton(".");
-		button_51.setTextByShift(">");
+		VirtualButton btnDot = new VirtualButton(".");
+		btnDot.setTextByShift(">");
 
-		VirtualButton button_52 = new VirtualButton("/");
-		button_52.setTextByShift("?");
+		VirtualButton btnSlash = new VirtualButton("/");
+		btnSlash.setTextByShift("?");
 
 		VirtualButton btnShift2 = new VirtualButton("Shift");
 		btnShift2.setHorizontalAlignment(SwingConstants.LEFT);
@@ -659,11 +683,11 @@ public class Main extends JFrame {
 		btnHome.setMargin(new Insets(0, 0, 0, 0));
 		btnHome.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-		VirtualButton button_63 = new VirtualButton("<html><center>Page<br/>Up</center></html>");
-		button_63.setTextByShift("");
+		VirtualButton page_up = new VirtualButton("<html><center>Page<br/>Up</center></html>");
+		page_up.setTextByShift("");
 		;
-		button_63.setMargin(new Insets(0, 0, 0, 0));
-		button_63.setFont(new Font("Dialog", Font.PLAIN, 12));
+		page_up.setMargin(new Insets(0, 0, 0, 0));
+		page_up.setFont(new Font("Dialog", Font.PLAIN, 12));
 
 		VirtualButton btnDelete = new VirtualButton("Delete");
 		btnDelete.setText("Del");
@@ -676,85 +700,230 @@ public class Main extends JFrame {
 		btnEnd.setMargin(new Insets(0, 0, 0, 0));
 		btnEnd.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-		VirtualButton button_66 = new VirtualButton("<html><center>Page<br/>Down</center></html>");
-		button_66.setTextByShift("");
-		button_66.setMargin(new Insets(0, 0, 0, 0));
-		button_66.setFont(new Font("Dialog", Font.PLAIN, 12));
+		VirtualButton page_down = new VirtualButton("<html><center>Page<br/>Down</center></html>");
+		page_down.setTextByShift("");
+		page_down.setMargin(new Insets(0, 0, 0, 0));
+		page_down.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-		VirtualButton button_67 = new VirtualButton("");
-		button_67.setIcon(new ImageIcon(Main.class.getResource("/img/left.png")));
-		button_67.setFont(new Font("Dialog", Font.PLAIN, 12));
+		VirtualButton left = new VirtualButton("");
+		left.setIcon(new ImageIcon(Main.class.getResource("/img/left.png")));
+		left.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-		VirtualButton button_68 = new VirtualButton("");
-		button_68.setIcon(new ImageIcon(Main.class.getResource("/img/down.png")));
-		button_68.setFont(new Font("Dialog", Font.PLAIN, 12));
+		VirtualButton down = new VirtualButton("");
+		down.setIcon(new ImageIcon(Main.class.getResource("/img/down.png")));
+		down.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-		VirtualButton button_69 = new VirtualButton("");
-		button_69.setIcon(new ImageIcon(Main.class.getResource("/img/right.png")));
-		button_69.setFont(new Font("Dialog", Font.PLAIN, 12));
+		VirtualButton right = new VirtualButton("");
+		right.setIcon(new ImageIcon(Main.class.getResource("/img/right.png")));
+		right.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-		VirtualButton button_70 = new VirtualButton("");
-		button_70.setIcon(new ImageIcon(Main.class.getResource("/img/up.png")));
-		button_70.setFont(new Font("Dialog", Font.PLAIN, 12));
+		VirtualButton up = new VirtualButton("");
+		up.setIcon(new ImageIcon(Main.class.getResource("/img/up.png")));
+		up.setFont(new Font("Dialog", Font.PLAIN, 12));
 
-		VirtualButton virtualButton = new VirtualButton("a");
-		virtualButton.setTextByShift("");
-		virtualButton.setText("Ctrl");
-		virtualButton.setNormalText("Ctrl");
+		VirtualButton btnCtrl = new VirtualButton("a");
+		btnCtrl.setTextByShift("");
+		btnCtrl.setText("Ctrl");
+		btnCtrl.setNormalText("Ctrl");
 
-		VirtualButton virtualButton_1 = new VirtualButton("a");
-		virtualButton_1.setIcon(new ImageIcon(Main.class.getResource("/img/windows8.png")));
-		virtualButton_1.setTextByShift("");
-		virtualButton_1.setText("");
-		virtualButton_1.setNormalText("");
+		VirtualButton btnSuper = new VirtualButton("a");
+		btnSuper.setIcon(new ImageIcon(Main.class.getResource("/img/windows8.png")));
+		btnSuper.setTextByShift("");
+		btnSuper.setText("");
+		btnSuper.setNormalText("");
 
-		VirtualButton vrtlbtnAlt = new VirtualButton("a");
-		vrtlbtnAlt.setTextByShift("");
-		vrtlbtnAlt.setText("Alt");
-		vrtlbtnAlt.setNormalText("Alt");
+		VirtualButton btnAlt = new VirtualButton("a");
+		btnAlt.setTextByShift("");
+		btnAlt.setText("Alt");
+		btnAlt.setNormalText("Alt");
 
-		VirtualButton virtualButton_3 = new VirtualButton("a");
-		virtualButton_3.setTextByShift("");
-		virtualButton_3.setText("Ctrl");
-		virtualButton_3.setNormalText("Ctrl");
+		VirtualButton btnCtrl2 = new VirtualButton("a");
+		btnCtrl2.setTextByShift("");
+		btnCtrl2.setText("Ctrl");
+		btnCtrl2.setNormalText("Ctrl");
 
-		VirtualButton virtualButton_4 = new VirtualButton("a");
-		virtualButton_4.setIcon(new ImageIcon(Main.class.getResource("/img/windows8.png")));
-		virtualButton_4.setTextByShift("");
-		virtualButton_4.setText("");
-		virtualButton_4.setNormalText("");
+		VirtualButton btnSuper2 = new VirtualButton("a");
+		btnSuper2.setIcon(new ImageIcon(Main.class.getResource("/img/windows8.png")));
+		btnSuper2.setTextByShift("");
+		btnSuper2.setText("");
+		btnSuper2.setNormalText("");
 
-		VirtualButton vrtlbtnAlt_1 = new VirtualButton("a");
-		vrtlbtnAlt_1.setTextByShift("");
-		vrtlbtnAlt_1.setText("Alt");
-		vrtlbtnAlt_1.setNormalText("Alt");
+		VirtualButton btnAlt2 = new VirtualButton("a");
+		btnAlt2.setTextByShift("");
+		btnAlt2.setText("Alt");
+		btnAlt2.setNormalText("Alt");
 
-		VirtualButton virtualButton_6 = new VirtualButton("a");
-		virtualButton_6.setToolTipText("Space");
-		virtualButton_6.setTextByShift("");
-		virtualButton_6.setText("");
-		virtualButton_6.setNormalText("");
+		VirtualButton btnSpace = new VirtualButton("a");
+		btnSpace.setToolTipText("Space");
+		btnSpace.setTextByShift("");
+		btnSpace.setText(" ");
+		btnSpace.setNormalText(" ");
+		
+		vt = Virtualizer.getInstance((a, b) -> {
+			if (!b) {
+				btnCaps.setBackground(null);
+				lblcaps.setIcon(red);
+			} else {
+				btnCaps.setBackground(new Color(0, 255, 0));
+				lblcaps.setIcon(green);
+			}
+			
+		} , null);		
+		//// Button Register
+		vt.registerButton(btnA);
+		vt.registerButton(btnB);
+		vt.registerButton(btnC);
+		vt.registerButton(btnD);
+		vt.registerButton(btnE);
+		vt.registerButton(btnF);
+		vt.registerButton(btnG);
+		vt.registerButton(btnH);
+		vt.registerButton(btnI);
+		vt.registerButton(btnJ);
+		vt.registerButton(btnK);
+		vt.registerButton(btnL);
+		vt.registerButton(btnM);
+		vt.registerButton(btnN);
+		vt.registerButton(btnO);
+		vt.registerButton(btnP);
+		vt.registerButton(btnQ);
+		vt.registerButton(btnR);
+		vt.registerButton(btnS);
+		vt.registerButton(btnT);
+		vt.registerButton(btnU);
+		vt.registerButton(btnV);
+		vt.registerButton(btnW);
+		vt.registerButton(btnX);
+		vt.registerButton(btnY);
+		vt.registerButton(btnZ);
+		vt.registerButton(button_1);
+		vt.registerButton(button_2);
+		vt.registerButton(button_3);
+		vt.registerButton(button_4);
+		vt.registerButton(button_5);
+		vt.registerButton(button_6);
+		vt.registerButton(button_7);
+		vt.registerButton(button_8);
+		vt.registerButton(button_9);
+		vt.registerButton(button_0);
+		vt.registerButton(btnoem3);
+		vt.registerButton(btn_dash);
+		vt.registerButton(btn_eq);
+		vt.registerButton(btnBracket);
+		vt.registerButton(btnCBracket);
+		vt.registerButton(btnSemiColon);
+		vt.registerButton(btnQoute);
+		vt.registerButton(btnComma);
+		vt.registerButton(btnDot);
+		vt.registerButton(btnSlash);
+		vt.registerButton(btnBSlash);
+		vt.registerButton(btnSpace);
+		vt.registerFnButton(f1);
+		vt.registerFnButton(f2);
+		vt.registerFnButton(f3);
+		vt.registerFnButton(f4);
+		vt.registerFnButton(f5);
+		vt.registerFnButton(f6);
+		vt.registerFnButton(f7);
+		vt.registerFnButton(f8);
+		vt.registerFnButton(f9);
+		vt.registerFnButton(f10);
+		vt.registerFnButton(f11);
+		vt.registerFnButton(f12);
+		vt.registerEscButton(esc);
+		vt.registerAltButton(btnAlt);
+		vt.registerAltButton(btnAlt2);
+		vt.registerShiftButton(btnShift);
+		vt.registerShiftButton(btnShift2);
+		vt.registerCtrlButton(btnCtrl);
+		vt.registerCtrlButton(btnCtrl2);
+		vt.registerCapsButton(btnCaps);
+		vt.registerBackSpaceButton(btnBackspace);
+		vt.registerSuperButton(btnSuper);
+		vt.registerSuperButton(btnSuper2);
+		vt.registerEnterButton(btnEnter);
+		vt.registerPrintScreenButton(prscr);
+		vt.registerScrollLockButton(scrlck);
+		vt.registerPausBrButton(psebrk);
+		vt.registerUpButton(up);
+		vt.registerDownButton(down);
+		vt.registerRightButton(right);
+		vt.registerLeftButton(left);
+		vt.registerDeleteButton(btnDelete);
+		vt.registerEndButton(btnEnd);
+		vt.registerHomeButton(btnHome);
+		vt.registerInsertButton(btnInsert);
+		vt.registerPageUpButton(page_up);
+		vt.registerPageDownButton(page_down);
+		vt.registerContextMenuButton(btnContext);
+		vt.registerTabButton(btnTab);
+
+		vt.setShiftChangeListener((a, b) -> {
+			if (a == ButtonStates.OFF) {
+				btnShift.setBackground(null);
+				btnShift2.setBackground(null);
+			} else if (a == ButtonStates.ON) {
+				btnShift.setBackground(new Color(0, 255, 0));
+				btnShift2.setBackground(new Color(0, 255, 0));
+			} else if (a == ButtonStates.LOCKED) {
+				btnShift.setBackground(new Color(255, 0, 0));
+				btnShift2.setBackground(new Color(255, 0, 0));
+			}
+		});
+
+		vt.setAltChangeListener((a, b) -> {
+			if (a == ButtonStates.OFF) {
+				btnAlt.setBackground(null);
+				btnAlt2.setBackground(null);
+			} else if (a == ButtonStates.ON) {
+				btnAlt.setBackground(new Color(0, 255, 0));
+				btnAlt2.setBackground(new Color(0, 255, 0));
+			} else if (a == ButtonStates.LOCKED) {
+				btnAlt.setBackground(new Color(255, 0, 0));
+				btnAlt2.setBackground(new Color(255, 0, 0));
+			}
+		});
+
+		vt.setCtrlChangeListener((a, b) -> {
+			if (a == ButtonStates.OFF) {
+				btnCtrl.setBackground(null);
+				btnCtrl2.setBackground(null);
+			} else if (a == ButtonStates.ON) {
+				btnCtrl.setBackground(new Color(0, 255, 0));
+				btnCtrl2.setBackground(new Color(0, 255, 0));
+			} else if (a == ButtonStates.LOCKED) {
+				btnCtrl.setBackground(new Color(255, 0, 0));
+				btnCtrl2.setBackground(new Color(255, 0, 0));
+			}
+		});
+
+		vt.setNumlChangeListener((a, b) -> {
+			if (a == ButtonStates.OFF) {
+				btnCtrl.setBackground(null);
+			} else if (a == ButtonStates.ON) {
+				btnCtrl.setBackground(new Color(0, 255, 0));
+			}
+		});
 
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(gl_panel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel.createSequentialGroup().addContainerGap().addGroup(gl_panel
 						.createParallelGroup(Alignment.LEADING)
 						.addGroup(gl_panel.createSequentialGroup()
-								.addComponent(virtualButton, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnCtrl, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(virtualButton_1, GroupLayout.PREFERRED_SIZE, 72,
-										GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSuper, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(vrtlbtnAlt, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnAlt, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(virtualButton_6, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+								.addComponent(btnSpace, GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(vrtlbtnAlt_1, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnAlt2, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(virtualButton_4, GroupLayout.PREFERRED_SIZE, 72,
-										GroupLayout.PREFERRED_SIZE)
-								.addPreferredGap(ComponentPlacement.RELATED).addComponent(virtualButton_3,
-										GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE))
+								.addComponent(btnSuper2, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE)
+								.addPreferredGap(
+										ComponentPlacement.RELATED)
+								.addComponent(btnCtrl2, GroupLayout.PREFERRED_SIZE, 72, GroupLayout.PREFERRED_SIZE))
 						.addGroup(gl_panel.createSequentialGroup()
 								.addComponent(btnCaps, GroupLayout.PREFERRED_SIZE, 126, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
@@ -766,25 +935,25 @@ public class Main extends JFrame {
 								.addGap(6)
 								.addComponent(btnF, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
+								.addComponent(btnG, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addGap(6)
 								.addComponent(btnH, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
-								.addComponent(btnH_1, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
-								.addGap(6)
-								.addComponent(btnI_1, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnJ, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
 								.addComponent(btnK, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
 								.addComponent(btnL, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
-								.addComponent(button_39, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSemiColon, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
-								.addComponent(button_40, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnQoute, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addComponent(btnEnter, GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE))
 						.addGroup(gl_panel.createSequentialGroup()
 								.addGroup(gl_panel.createParallelGroup(Alignment.LEADING, false)
-										.addComponent(esc, GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE).addComponent(
-												button, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+										.addComponent(esc, GroupLayout.DEFAULT_SIZE, 45, Short.MAX_VALUE)
+										.addComponent(btnoem3, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
 												Short.MAX_VALUE))
 								.addGap(5)
 								.addComponent(button_1, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
@@ -815,10 +984,10 @@ public class Main extends JFrame {
 												.addComponent(button_9, GroupLayout.PREFERRED_SIZE, 44,
 														GroupLayout.PREFERRED_SIZE)
 												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(button_10, GroupLayout.PREFERRED_SIZE, 44,
+												.addComponent(button_0, GroupLayout.PREFERRED_SIZE, 44,
 														GroupLayout.PREFERRED_SIZE)
 												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(button_11, GroupLayout.PREFERRED_SIZE, 44,
+												.addComponent(btn_dash, GroupLayout.PREFERRED_SIZE, 44,
 														GroupLayout.PREFERRED_SIZE)
 												.addPreferredGap(ComponentPlacement.RELATED))
 										.addGroup(Alignment.TRAILING,
@@ -850,10 +1019,10 @@ public class Main extends JFrame {
 														.addGap(24)))
 								.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
 										.addGroup(gl_panel.createSequentialGroup()
-												.addComponent(button_12, GroupLayout.PREFERRED_SIZE, 44,
+												.addComponent(btn_eq, GroupLayout.PREFERRED_SIZE, 44,
 														GroupLayout.PREFERRED_SIZE)
 												.addPreferredGap(ComponentPlacement.RELATED)
-												.addComponent(button_13, GroupLayout.PREFERRED_SIZE, 44,
+												.addComponent(btnBSlash, GroupLayout.PREFERRED_SIZE, 44,
 														GroupLayout.PREFERRED_SIZE)
 												.addPreferredGap(ComponentPlacement.RELATED).addComponent(btnBackspace,
 														GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE))
@@ -892,11 +1061,11 @@ public class Main extends JFrame {
 								.addGap(6)
 								.addComponent(btnP, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
-								.addComponent(button_26, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnBracket, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
-								.addComponent(button_27, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnCBracket, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(button_28, GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE))
+								.addComponent(btnContext, GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE))
 						.addGroup(gl_panel.createSequentialGroup()
 								.addComponent(btnShift, GroupLayout.PREFERRED_SIZE, 152, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
@@ -914,17 +1083,16 @@ public class Main extends JFrame {
 								.addGap(6)
 								.addComponent(btnM, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
-								.addComponent(button_49, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnComma, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addGap(6)
-								.addComponent(button_51, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnDot, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(button_52, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSlash, GroupLayout.PREFERRED_SIZE, 44, GroupLayout.PREFERRED_SIZE)
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addComponent(btnShift2, GroupLayout.DEFAULT_SIZE, 174, Short.MAX_VALUE)))
 						.addGap(25)
 						.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
-								.addComponent(button_67, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
-										Short.MAX_VALUE)
+								.addComponent(left, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 								.addComponent(btnDelete, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
 										Short.MAX_VALUE)
 								.addComponent(btnInsert, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
@@ -933,11 +1101,10 @@ public class Main extends JFrame {
 						.addPreferredGap(ComponentPlacement.RELATED)
 						.addGroup(gl_panel.createParallelGroup(Alignment.LEADING, false)
 								.addGroup(gl_panel.createSequentialGroup()
-										.addComponent(button_68, GroupLayout.PREFERRED_SIZE, 59,
-												GroupLayout.PREFERRED_SIZE)
+										.addComponent(down, GroupLayout.PREFERRED_SIZE, 59, GroupLayout.PREFERRED_SIZE)
 										.addPreferredGap(ComponentPlacement.RELATED)
-										.addComponent(button_69, GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE))
-								.addComponent(button_70, GroupLayout.PREFERRED_SIZE, 59, GroupLayout.PREFERRED_SIZE)
+										.addComponent(right, GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE))
+								.addComponent(up, GroupLayout.PREFERRED_SIZE, 59, GroupLayout.PREFERRED_SIZE)
 								.addGroup(gl_panel.createSequentialGroup()
 										.addGroup(gl_panel.createParallelGroup(Alignment.LEADING, false)
 												.addComponent(btnEnd, GroupLayout.DEFAULT_SIZE,
@@ -948,9 +1115,9 @@ public class Main extends JFrame {
 														Short.MAX_VALUE))
 										.addPreferredGap(ComponentPlacement.RELATED)
 										.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
-												.addComponent(button_66, GroupLayout.DEFAULT_SIZE,
+												.addComponent(page_down, GroupLayout.DEFAULT_SIZE,
 														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-												.addComponent(button_63, GroupLayout.DEFAULT_SIZE,
+												.addComponent(page_up, GroupLayout.DEFAULT_SIZE,
 														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 												.addComponent(psebrk, GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE))))
 						.addGap(20)));
@@ -972,11 +1139,11 @@ public class Main extends JFrame {
 														GroupLayout.PREFERRED_SIZE)
 												.addComponent(btnHome, GroupLayout.PREFERRED_SIZE, 33,
 														GroupLayout.PREFERRED_SIZE))
-										.addComponent(button_63, GroupLayout.PREFERRED_SIZE, 33,
+										.addComponent(page_up, GroupLayout.PREFERRED_SIZE, 33,
 												GroupLayout.PREFERRED_SIZE))
 								.addPreferredGap(ComponentPlacement.RELATED)
 								.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-										.addComponent(button_66, GroupLayout.PREFERRED_SIZE, 33,
+										.addComponent(page_down, GroupLayout.PREFERRED_SIZE, 33,
 												GroupLayout.PREFERRED_SIZE)
 										.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
 												.addComponent(btnDelete, GroupLayout.PREFERRED_SIZE, 33,
@@ -1002,7 +1169,7 @@ public class Main extends JFrame {
 								.addGap(18)
 								.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
 										.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-												.addComponent(button, GroupLayout.PREFERRED_SIZE, 35,
+												.addComponent(btnoem3, GroupLayout.PREFERRED_SIZE, 35,
 														GroupLayout.PREFERRED_SIZE)
 												.addComponent(button_1, GroupLayout.PREFERRED_SIZE, 35,
 														GroupLayout.PREFERRED_SIZE)
@@ -1022,13 +1189,13 @@ public class Main extends JFrame {
 														GroupLayout.PREFERRED_SIZE)
 												.addComponent(button_9, GroupLayout.PREFERRED_SIZE, 35,
 														GroupLayout.PREFERRED_SIZE)
-												.addComponent(button_10, GroupLayout.PREFERRED_SIZE, 35,
+												.addComponent(button_0, GroupLayout.PREFERRED_SIZE, 35,
 														GroupLayout.PREFERRED_SIZE)
-												.addComponent(button_11, GroupLayout.PREFERRED_SIZE, 35,
+												.addComponent(btn_dash, GroupLayout.PREFERRED_SIZE, 35,
 														GroupLayout.PREFERRED_SIZE)
-												.addComponent(button_12, GroupLayout.PREFERRED_SIZE, 35,
+												.addComponent(btn_eq, GroupLayout.PREFERRED_SIZE, 35,
 														GroupLayout.PREFERRED_SIZE)
-												.addComponent(button_13, GroupLayout.PREFERRED_SIZE, 35,
+												.addComponent(btnBSlash, GroupLayout.PREFERRED_SIZE, 35,
 														GroupLayout.PREFERRED_SIZE))
 										.addComponent(btnBackspace, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE))
@@ -1036,7 +1203,7 @@ public class Main extends JFrame {
 								.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
 										.addComponent(btnTab, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE)
-										.addComponent(button_28, GroupLayout.PREFERRED_SIZE, 35,
+										.addComponent(btnContext, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE)
 										.addComponent(btnQ, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 										.addComponent(btnW, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
@@ -1048,9 +1215,9 @@ public class Main extends JFrame {
 										.addComponent(btnI, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 										.addComponent(btnO, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 										.addComponent(btnP, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-										.addComponent(button_26, GroupLayout.PREFERRED_SIZE, 35,
+										.addComponent(btnBracket, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE)
-										.addComponent(button_27, GroupLayout.PREFERRED_SIZE, 35,
+										.addComponent(btnCBracket, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE))))
 						.addPreferredGap(ComponentPlacement.RELATED)
 						.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
@@ -1058,13 +1225,13 @@ public class Main extends JFrame {
 								.addComponent(btnS, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnD, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnF, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnG, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnH, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnH_1, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(btnI_1, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnJ, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnK, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnL, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(button_39, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(button_40, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSemiColon, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnQoute, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnEnter, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnCaps, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE))
 						.addPreferredGap(ComponentPlacement.RELATED)
@@ -1076,162 +1243,158 @@ public class Main extends JFrame {
 								.addComponent(btnB, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnN, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnM, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(button_49, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnComma, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addComponent(btnShift, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
 								.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
-										.addComponent(button_51, GroupLayout.PREFERRED_SIZE, 35,
+										.addComponent(btnDot, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE)
-										.addComponent(button_52, GroupLayout.PREFERRED_SIZE, 35,
+										.addComponent(btnSlash, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE)
 										.addComponent(btnShift2, GroupLayout.PREFERRED_SIZE, 35,
 												GroupLayout.PREFERRED_SIZE))
-								.addComponent(button_70, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
+								.addComponent(up, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
 						.addPreferredGap(ComponentPlacement.RELATED)
 						.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-								.addComponent(button_68, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_1, GroupLayout.PREFERRED_SIZE, 35,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(vrtlbtnAlt, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_3, GroupLayout.PREFERRED_SIZE, 35,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_4, GroupLayout.PREFERRED_SIZE, 35,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(vrtlbtnAlt_1, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_6, GroupLayout.PREFERRED_SIZE, 35,
-										GroupLayout.PREFERRED_SIZE)
-								.addComponent(button_69, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(button_67, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
+								.addComponent(down, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnCtrl, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSuper, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnAlt, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnCtrl2, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSuper2, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnAlt2, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(btnSpace, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+								.addComponent(right, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
+								.addComponent(left, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
 						.addContainerGap(21, Short.MAX_VALUE)));
 		panel.setLayout(gl_panel);
 		contentPane.add(panel_2, BorderLayout.EAST);
-		
+
 		VirtualButton vrtlbtnNumLock = new VirtualButton("Delete");
 		vrtlbtnNumLock.setTextByShift("");
 		vrtlbtnNumLock.setText("<html><center>Num<br/>Lock</center></html>");
 		vrtlbtnNumLock.setNormalText("<html><center>Num<br/>Lock</center></html>");
 		vrtlbtnNumLock.setMargin(new Insets(0, 0, 0, 0));
 		vrtlbtnNumLock.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_5 = new VirtualButton("Delete");
 		virtualButton_5.setTextByShift("");
 		virtualButton_5.setText("/");
 		virtualButton_5.setNormalText("/");
 		virtualButton_5.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_5.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_7 = new VirtualButton("Delete");
 		virtualButton_7.setTextByShift("");
 		virtualButton_7.setText("*");
 		virtualButton_7.setNormalText("*");
 		virtualButton_7.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_7.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_8 = new VirtualButton("Delete");
 		virtualButton_8.setTextByShift("");
 		virtualButton_8.setText("-");
 		virtualButton_8.setNormalText("-");
 		virtualButton_8.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_8.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_9 = new VirtualButton("Delete");
 		virtualButton_9.setTextByShift("");
 		virtualButton_9.setText("7");
 		virtualButton_9.setNormalText("7");
 		virtualButton_9.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_9.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_10 = new VirtualButton("Delete");
 		virtualButton_10.setTextByShift("");
 		virtualButton_10.setText("8");
 		virtualButton_10.setNormalText("8");
 		virtualButton_10.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_10.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_11 = new VirtualButton("Delete");
 		virtualButton_11.setTextByShift("");
 		virtualButton_11.setText("9");
 		virtualButton_11.setNormalText("9");
 		virtualButton_11.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_11.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_12 = new VirtualButton("Delete");
 		virtualButton_12.setTextByShift("");
 		virtualButton_12.setText("4");
 		virtualButton_12.setNormalText("4");
 		virtualButton_12.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_12.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_13 = new VirtualButton("Delete");
 		virtualButton_13.setTextByShift("");
 		virtualButton_13.setText("5");
 		virtualButton_13.setNormalText("5");
 		virtualButton_13.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_13.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_14 = new VirtualButton("Delete");
 		virtualButton_14.setTextByShift("");
 		virtualButton_14.setText("6");
 		virtualButton_14.setNormalText("6");
 		virtualButton_14.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_14.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_15 = new VirtualButton("Delete");
 		virtualButton_15.setTextByShift("");
 		virtualButton_15.setText("1");
 		virtualButton_15.setNormalText("1");
 		virtualButton_15.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_15.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_16 = new VirtualButton("Delete");
 		virtualButton_16.setTextByShift("");
 		virtualButton_16.setText("2");
 		virtualButton_16.setNormalText("2");
 		virtualButton_16.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_16.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_17 = new VirtualButton("Delete");
 		virtualButton_17.setTextByShift("");
 		virtualButton_17.setText("3");
 		virtualButton_17.setNormalText("3");
 		virtualButton_17.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_17.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_18 = new VirtualButton("Delete");
 		virtualButton_18.setTextByShift("");
 		virtualButton_18.setText("0");
 		virtualButton_18.setNormalText("0");
 		virtualButton_18.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_18.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_19 = new VirtualButton("Delete");
 		virtualButton_19.setTextByShift("");
 		virtualButton_19.setText(".");
 		virtualButton_19.setNormalText(".");
 		virtualButton_19.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_19.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton virtualButton_20 = new VirtualButton("Delete");
 		virtualButton_20.setTextByShift("");
 		virtualButton_20.setText("+");
 		virtualButton_20.setNormalText("+");
 		virtualButton_20.setMargin(new Insets(0, 0, 0, 0));
 		virtualButton_20.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton vrtlbtnEnter = new VirtualButton("Delete");
 		vrtlbtnEnter.setTextByShift("");
 		vrtlbtnEnter.setText("Enter");
 		vrtlbtnEnter.setNormalText("Del");
 		vrtlbtnEnter.setMargin(new Insets(0, 0, 0, 0));
 		vrtlbtnEnter.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton vrtlbtnVol = new VirtualButton("Delete");
 		vrtlbtnVol.setTextByShift("");
 		vrtlbtnVol.setText("Vol-");
 		vrtlbtnVol.setNormalText("Vol-");
 		vrtlbtnVol.setMargin(new Insets(0, 0, 0, 0));
 		vrtlbtnVol.setFont(new Font("Dialog", Font.PLAIN, 12));
-		
+
 		VirtualButton vrtlbtnVol_1 = new VirtualButton("Delete");
 		vrtlbtnVol_1.setTextByShift("");
 		vrtlbtnVol_1.setText("Vol+");
@@ -1239,96 +1402,130 @@ public class Main extends JFrame {
 		vrtlbtnVol_1.setMargin(new Insets(0, 0, 0, 0));
 		vrtlbtnVol_1.setFont(new Font("Dialog", Font.PLAIN, 12));
 		GroupLayout gl_panel_2 = new GroupLayout(panel_2);
-		gl_panel_2.setHorizontalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_2.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_2.createSequentialGroup()
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
+		gl_panel_2
+				.setHorizontalGroup(gl_panel_2.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_2
+						.createSequentialGroup().addContainerGap().addGroup(gl_panel_2
+								.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_2
+										.createSequentialGroup().addGroup(
+												gl_panel_2.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_2
+														.createSequentialGroup()
+														.addComponent(virtualButton_15, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(virtualButton_16, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE))
+														.addComponent(virtualButton_18, GroupLayout.PREFERRED_SIZE, 114,
+																GroupLayout.PREFERRED_SIZE))
+										.addPreferredGap(ComponentPlacement.RELATED)
+										.addGroup(gl_panel_2.createParallelGroup(Alignment.TRAILING, false)
+												.addComponent(virtualButton_19, GroupLayout.DEFAULT_SIZE,
+														GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+												.addComponent(virtualButton_17, GroupLayout.DEFAULT_SIZE, 54,
+														Short.MAX_VALUE))
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(vrtlbtnEnter,
+												GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))
 								.addGroup(gl_panel_2.createSequentialGroup()
-									.addComponent(virtualButton_15, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(virtualButton_16, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))
-								.addComponent(virtualButton_18, GroupLayout.PREFERRED_SIZE, 114, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.TRAILING, false)
-								.addComponent(virtualButton_19, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-								.addComponent(virtualButton_17, GroupLayout.DEFAULT_SIZE, 54, Short.MAX_VALUE))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(vrtlbtnEnter, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_panel_2.createSequentialGroup()
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panel_2.createSequentialGroup()
-									.addComponent(virtualButton_9, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(virtualButton_10, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(virtualButton_11, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))
-								.addGroup(gl_panel_2.createSequentialGroup()
-									.addComponent(virtualButton_12, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(virtualButton_13, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(virtualButton_14, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(virtualButton_20, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_panel_2.createSequentialGroup()
-							.addComponent(vrtlbtnNumLock, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-								.addGroup(gl_panel_2.createSequentialGroup()
-									.addComponent(vrtlbtnVol, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(vrtlbtnVol_1, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))
-								.addGroup(gl_panel_2.createSequentialGroup()
-									.addComponent(virtualButton_5, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(virtualButton_7, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)
-									.addPreferredGap(ComponentPlacement.RELATED)
-									.addComponent(virtualButton_8, GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE)))))
-					.addContainerGap(24, Short.MAX_VALUE))
-		);
-		gl_panel_2.setVerticalGroup(
-			gl_panel_2.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_2.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panel_2.createParallelGroup(Alignment.BASELINE)
+										.addGroup(gl_panel_2
+												.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_2
+														.createSequentialGroup()
+														.addComponent(virtualButton_9, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(virtualButton_10, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(virtualButton_11, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE))
+												.addGroup(gl_panel_2.createSequentialGroup()
+														.addComponent(virtualButton_12, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(virtualButton_13, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE)
+														.addPreferredGap(ComponentPlacement.RELATED)
+														.addComponent(virtualButton_14, GroupLayout.PREFERRED_SIZE, 54,
+																GroupLayout.PREFERRED_SIZE)))
+										.addPreferredGap(ComponentPlacement.RELATED).addComponent(virtualButton_20,
+												GroupLayout.PREFERRED_SIZE, 54, GroupLayout.PREFERRED_SIZE))
+								.addGroup(
+										gl_panel_2.createSequentialGroup()
+												.addComponent(vrtlbtnNumLock, GroupLayout.PREFERRED_SIZE, 54,
+														GroupLayout.PREFERRED_SIZE)
+												.addPreferredGap(ComponentPlacement.RELATED)
+												.addGroup(gl_panel_2
+														.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_2
+																.createSequentialGroup()
+																.addComponent(vrtlbtnVol, GroupLayout.PREFERRED_SIZE,
+																		54, GroupLayout.PREFERRED_SIZE)
+																.addPreferredGap(ComponentPlacement.RELATED)
+																.addComponent(
+																		vrtlbtnVol_1, GroupLayout.PREFERRED_SIZE, 54,
+																		GroupLayout.PREFERRED_SIZE))
+														.addGroup(gl_panel_2.createSequentialGroup()
+																.addComponent(virtualButton_5,
+																		GroupLayout.PREFERRED_SIZE, 54,
+																		GroupLayout.PREFERRED_SIZE)
+																.addPreferredGap(ComponentPlacement.RELATED)
+																.addComponent(virtualButton_7,
+																		GroupLayout.PREFERRED_SIZE, 54,
+																		GroupLayout.PREFERRED_SIZE)
+																.addPreferredGap(ComponentPlacement.RELATED)
+																.addComponent(virtualButton_8,
+																		GroupLayout.PREFERRED_SIZE, 54,
+																		GroupLayout.PREFERRED_SIZE)))))
+						.addContainerGap(24, Short.MAX_VALUE)));
+		gl_panel_2.setVerticalGroup(gl_panel_2.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_2
+				.createSequentialGroup().addContainerGap()
+				.addGroup(gl_panel_2.createParallelGroup(Alignment.BASELINE)
 						.addComponent(vrtlbtnVol, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
 						.addComponent(vrtlbtnVol_1, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
-					.addGap(18)
-					.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
+				.addGap(18)
+				.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
 						.addComponent(virtualButton_8, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
 						.addComponent(virtualButton_7, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
 						.addComponent(virtualButton_5, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
 						.addComponent(vrtlbtnNumLock, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING, false)
-						.addGroup(gl_panel_2.createSequentialGroup()
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-								.addComponent(virtualButton_9, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_10, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_11, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-								.addComponent(virtualButton_12, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_13, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_14, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)))
-						.addComponent(virtualButton_20, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-					.addPreferredGap(ComponentPlacement.RELATED)
-					.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING, false)
-						.addGroup(gl_panel_2.createSequentialGroup()
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-								.addComponent(virtualButton_15, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_16, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_17, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
-								.addComponent(virtualButton_18, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-								.addComponent(virtualButton_19, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)))
-						.addComponent(vrtlbtnEnter, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-					.addContainerGap(31, Short.MAX_VALUE))
-		);
+				.addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING,
+						false)
+						.addGroup(gl_panel_2
+								.createSequentialGroup()
+								.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
+										.addComponent(virtualButton_9, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(virtualButton_10, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(virtualButton_11, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE))
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
+										.addComponent(virtualButton_12, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(virtualButton_13, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(virtualButton_14, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)))
+						.addComponent(virtualButton_20, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+								Short.MAX_VALUE))
+				.addPreferredGap(ComponentPlacement.RELATED).addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING,
+						false)
+						.addGroup(gl_panel_2
+								.createSequentialGroup()
+								.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
+										.addComponent(virtualButton_15, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(virtualButton_16, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(virtualButton_17, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE))
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addGroup(gl_panel_2.createParallelGroup(Alignment.LEADING)
+										.addComponent(virtualButton_18, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(virtualButton_19, GroupLayout.PREFERRED_SIZE, 33,
+												GroupLayout.PREFERRED_SIZE)))
+						.addComponent(vrtlbtnEnter, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE,
+								Short.MAX_VALUE))
+				.addContainerGap(31, Short.MAX_VALUE)));
 		panel_2.setLayout(gl_panel_2);
 
 	}
