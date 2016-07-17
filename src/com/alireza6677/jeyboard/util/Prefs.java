@@ -1,4 +1,4 @@
-package com.alireza6677.virtualkeys.util;
+package com.alireza6677.jeyboard.util;
 
 import java.util.prefs.Preferences;
 
@@ -10,6 +10,7 @@ public class Prefs {
 	
 	private static final String OPACITY_KEY = "WINDOW_OPACITY";
 	private static final String THEME_KEY = "APP_THEME";
+	private static final String EXPANDED_KEY = "WINDOW_EXPANDED";
 	
 	private Preferences p;
 	
@@ -48,5 +49,12 @@ public class Prefs {
 		return new GraphiteLookAndFeel();
 	}
 	
+	public boolean getExpandedState(){
+		return p.getBoolean(EXPANDED_KEY, false);
+	}
+	
+	public void saveExpandedState(boolean state){
+		p.putBoolean(EXPANDED_KEY, state);
+	}
 	
 }

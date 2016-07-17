@@ -1,4 +1,4 @@
-package img;
+package com.alireza6677.jeyboard.util;
 
 import java.awt.*;
 import java.awt.event.*;

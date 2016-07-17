@@ -1,4 +1,4 @@
-package com.alireza6677.virtualkeys;
+package com.alireza6677.jeyboard;
 
 //
 //Decompiled by Procyon v0.5.29
@@ -31,8 +31,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
 
-import com.alireza6677.virtualkeys.ui.ShiftUpdater;
-import com.alireza6677.virtualkeys.ui.VirtualButton;
+import com.alireza6677.jeyboard.ui.ShiftUpdater;
+import com.alireza6677.jeyboard.ui.VirtualButton;
 import com.jtattoo.plaf.acryl.AcrylLookAndFeel;
 import com.jtattoo.plaf.aero.AeroLookAndFeel;
 import com.jtattoo.plaf.bernstein.BernsteinLookAndFeel;

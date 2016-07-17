@@ -1,9 +1,12 @@
-package com.alireza6677.virtualkeys.util;
+package com.alireza6677.jeyboard.util;
 
 import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
@@ -15,8 +18,8 @@ import org.jnativehook.NativeHookException;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
 
-import com.alireza6677.virtualkeys.ui.ShiftUpdater;
-import com.alireza6677.virtualkeys.ui.VirtualButton;
+import com.alireza6677.jeyboard.ui.ShiftUpdater;
+import com.alireza6677.jeyboard.ui.VirtualButton;
 
 public class Virtualizer implements NativeKeyListener {
 
@@ -28,9 +31,10 @@ public class Virtualizer implements NativeKeyListener {
 			INSTANCE = new Virtualizer();
 		return INSTANCE;
 	}
+
 	public static synchronized Virtualizer getInstance(lockingStateChangeListener cap, lockingStateChangeListener num) {
 		if (INSTANCE == null)
-			INSTANCE = new Virtualizer(cap , num);
+			INSTANCE = new Virtualizer(cap, num);
 		return INSTANCE;
 	}
 	// -#-#-#-#-#- //
@@ -57,8 +61,31 @@ public class Virtualizer implements NativeKeyListener {
 
 	private Robot mainRobot;
 	private boolean caps, alt, shift, ctrl, numl;
+	// Will be added
 	private ShiftUpdater shu;
-	
+
+	private MouseAdapter longPress = new MouseAdapter() {
+		private java.util.Timer t;
+
+		public void mousePressed(MouseEvent e) {
+			if (t == null) {
+				t = new java.util.Timer();
+			}
+			t.schedule(new TimerTask() {
+				public void run() {
+					((JButton)e.getSource()).doClick();
+				}
+			}, 600, 100);
+		}
+
+		public void mouseReleased(MouseEvent e) {
+			if (t != null) {
+				t.cancel();
+				t = null;
+			}
+		}
+	};
+
 	private void initVirtualizer() {
 		try {
 			GlobalScreen.registerNativeHook();
@@ -74,7 +101,7 @@ public class Virtualizer implements NativeKeyListener {
 
 		GlobalScreen.addNativeKeyListener(this);
 	}
-	
+
 	private Virtualizer() {
 		try {
 			mainRobot = new Robot();
@@ -93,13 +120,10 @@ public class Virtualizer implements NativeKeyListener {
 		initVirtualizer();
 	}
 
-
-
 	private Virtualizer(lockingStateChangeListener cap, lockingStateChangeListener num) {
 		this();
 		capsChangeListener = cap;
 		numlChangeListener = num;
-
 
 		System.out.println("aa");
 		if (capsChangeListener != null)
@@ -260,6 +284,7 @@ public class Virtualizer implements NativeKeyListener {
 			pressButton(getKeyCode(btn.getText().charAt(0)));
 			releaseLocks();
 		});
+		btn.addMouseListener(longPress);
 	}
 
 	public void registerFnButton(JButton btn) {
@@ -293,7 +318,7 @@ public class Virtualizer implements NativeKeyListener {
 			pressCtrl();
 		});
 	}
-
+	
 	public void registerCapsButton(JButton b) {
 		b.addActionListener(a -> {
 			pressCapsLock();
@@ -310,12 +335,14 @@ public class Virtualizer implements NativeKeyListener {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_BACK_SPACE);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerEnterButton(JButton b) {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_ENTER);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerPrintScreenButton(JButton b) {
@@ -352,12 +379,14 @@ public class Virtualizer implements NativeKeyListener {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_PAGE_UP);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerPageDownButton(JButton b) {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_PAGE_DOWN);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerEndButton(JButton b) {
@@ -370,24 +399,28 @@ public class Virtualizer implements NativeKeyListener {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_UP);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerDownButton(JButton b) {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_DOWN);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerRightButton(JButton b) {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_RIGHT);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerLeftButton(JButton b) {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_LEFT);
 		});
+		b.addMouseListener(longPress);
 	}
 
 	public void registerDeleteButton(JButton b) {
@@ -406,6 +439,53 @@ public class Virtualizer implements NativeKeyListener {
 		b.addActionListener(a -> {
 			pressButton(KeyEvent.VK_TAB);
 		});
+		b.addMouseListener(longPress);
+	}
+
+	public void registerNumlButton(JButton b) {
+		b.addActionListener(a -> {
+			pressNumLock();
+		});
+	}
+	
+	public void registerNumpadButton(JButton b) {
+		b.addActionListener(a -> {
+			pressButton(KeyEvent.VK_NUMPAD0 + Integer.parseInt(Character.toString(b.getText().charAt(0))));
+			releaseLocks();
+		});
+		b.addMouseListener(longPress);
+	}	
+	
+	public void registerDivisionButton(JButton b){
+		b.addActionListener(a -> {
+			pressButton(KeyEvent.VK_DIVIDE);
+			releaseLocks();
+		});
+		b.addMouseListener(longPress);
+	}
+
+	public void registerMultiplyButton(JButton b){
+		b.addActionListener(a -> {
+			pressButton(KeyEvent.VK_MULTIPLY);
+			releaseLocks();
+		});
+		b.addMouseListener(longPress);
+	}
+	
+	public void registerMinusButton(JButton b){
+		b.addActionListener(a -> {
+			pressButton(KeyEvent.VK_MINUS);
+			releaseLocks();
+		});
+		b.addMouseListener(longPress);
+	}
+	
+	public void registerAddButton(JButton b){
+		b.addActionListener(a -> {
+			pressButton(KeyEvent.VK_ADD);
+			releaseLocks();
+		});
+		b.addMouseListener(longPress);
 	}
 
 	private int getKeyCode(final char c) {
@@ -448,7 +528,7 @@ public class Virtualizer implements NativeKeyListener {
 			shift = false;
 			if (shiftChangeListener != null)
 				shiftChangeListener.stateChanged(shiftState, shift);
-		}  else if (ss.contains("Control")) {
+		} else if (ss.contains("Control")) {
 			ctrlState = ButtonStates.OFF;
 			ctrl = false;
 			if (ctrlChangeListener != null)
@@ -458,7 +538,13 @@ public class Virtualizer implements NativeKeyListener {
 			alt = false;
 			if (altChangeListener != null)
 				altChangeListener.stateChanged(altState, alt);
+		} else if (ss.equals("Num Lock")) {
+			numl = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_NUM_LOCK);
+			numlState = numl ? ButtonStates.ON : ButtonStates.OFF;
+			if (numlChangeListener != null)
+				numlChangeListener.stateChanged(numlState, numl);
 		}
+
 		if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
 			try {
 				GlobalScreen.unregisterNativeHook();

@@ -2,7 +2,7 @@
 // Decompiled by Procyon v0.5.29
 // 
 
-package com.alireza6677.virtualkeys.ui;
+package com.alireza6677.jeyboard.ui;
 
 import javax.swing.JButton;
 
@@ -13,14 +13,14 @@ public class VirtualButton extends JButton
     
     public VirtualButton(final String text, final String sh) {
         super(text);
-        this.setFocusable(true);
+        //this.setFocusable(true);
         this.shift = sh;
         this.txt = text;
     }
     
     public VirtualButton(final String text) {
         super(text);
-        this.setFocusable(false);
+       // this.setFocusable(true);
         this.shift = "";
         this.txt = text;
         setTextByShift(text.toUpperCase());

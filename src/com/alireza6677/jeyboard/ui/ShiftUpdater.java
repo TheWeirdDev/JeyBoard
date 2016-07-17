@@ -2,7 +2,7 @@
 // Decompiled by Procyon v0.5.29
 // 
 
-package com.alireza6677.virtualkeys.ui;
+package com.alireza6677.jeyboard.ui;
 
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
