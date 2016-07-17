@@ -516,7 +516,7 @@ public class Virtualizer implements NativeKeyListener {
 	@Override
 	public void nativeKeyReleased(NativeKeyEvent e) {
 		String ss = NativeKeyEvent.getKeyText(e.getKeyCode());
-		System.out.println("Key Pressed: " + ss);
+		//System.out.println("Key Pressed: " + ss);
 
 		if (ss.equals("Caps Lock")) {
 			caps = Toolkit.getDefaultToolkit().getLockingKeyState(KeyEvent.VK_CAPS_LOCK);
@@ -545,14 +545,6 @@ public class Virtualizer implements NativeKeyListener {
 				numlChangeListener.stateChanged(numlState, numl);
 		}
 
-		if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
-			try {
-				GlobalScreen.unregisterNativeHook();
-			} catch (NativeHookException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
 	}
 
 	@Override
