@@ -440,7 +440,7 @@ public class Main extends JFrame {
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		menuBar.add(horizontalStrut);
 
-		JLabel lblcaps = new JLabel("Caps");
+		JLabel lblcaps = new JLabel("Caps Lock");
 		lblcaps.setFont(new Font("Dialog", Font.PLAIN, 11));
 		lblcaps.setIcon(green);
 		menuBar.add(lblcaps);
@@ -1313,8 +1313,8 @@ public class Main extends JFrame {
 		vt.registerButton(btnoem3);
 		vt.registerButton(btn_dash);
 		vt.registerButton(btn_eq);
-		vt.registerButton(btnBracket);
-		vt.registerButton(btnCBracket);
+		vt.register‌BracketButton(btnBracket);
+		vt.register‌Bracket1Button(btnCBracket);
 		vt.registerButton(btnSemiColon);
 		vt.registerButton(btnQoute);
 		vt.registerButton(btnComma);

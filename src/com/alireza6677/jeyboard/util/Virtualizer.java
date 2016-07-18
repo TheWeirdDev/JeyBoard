@@ -293,7 +293,20 @@ public class Virtualizer implements NativeKeyListener {
 			releaseLocks();
 		});
 	}
-
+	
+	public void register‌BracketButton(JButton btn) {
+		btn.addActionListener(a -> {
+			pressButton(KeyEvent.VK_OPEN_BRACKET);
+			releaseLocks();
+		});
+	}
+	
+	public void register‌Bracket1Button(JButton btn) {
+		btn.addActionListener(a -> {
+			pressButton(KeyEvent.VK_CLOSE_BRACKET);
+			releaseLocks();
+		});
+	}
 	public void registerEscButton(VirtualButton btn) {
 		btn.addActionListener(a -> {
 			pressButton(KeyEvent.VK_ESCAPE);
