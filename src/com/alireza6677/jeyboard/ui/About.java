@@ -41,7 +41,7 @@ public class About extends JDialog {
 		});
 		setAlwaysOnTop(true);
 	    setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 450, 315);
+		setBounds(100, 100, 457, 337);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBackground(new Color(248, 248, 255));
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -62,32 +62,37 @@ public class About extends JDialog {
 		description.setFont(new Font("Dialog", Font.PLAIN, 11));
 		description.setHorizontalAlignment(SwingConstants.CENTER);
 		
-		JLabel lblNewLabel_1 = new JLabel("Powered by java8.0");
+		JLabel lblNewLabel_1 = new JLabel("Powered by Java 8");
 		lblNewLabel_1.setFont(new Font("Dialog", Font.PLAIN, 11));
+		
+		JLabel lblNewLabel_2 = new JLabel("Developer : @Alireza6677");
+		lblNewLabel_2.setFont(new Font("Dialog", Font.PLAIN, 12));
 		
 		GroupLayout gl_contentPanel = new GroupLayout(contentPanel);
 		gl_contentPanel.setHorizontalGroup(
-			gl_contentPanel.createParallelGroup(Alignment.TRAILING)
-				.addGroup(gl_contentPanel.createSequentialGroup()
-					.addGap(92)
-					.addComponent(lblNewLabel, GroupLayout.PREFERRED_SIZE, 246, GroupLayout.PREFERRED_SIZE)
-					.addContainerGap(102, Short.MAX_VALUE))
+			gl_contentPanel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_contentPanel.createSequentialGroup()
 					.addGap(58)
 					.addComponent(description, 0, 0, Short.MAX_VALUE)
 					.addGap(56))
 				.addGroup(gl_contentPanel.createSequentialGroup()
-					.addContainerGap(149, Short.MAX_VALUE)
-					.addComponent(label)
-					.addGap(141))
+					.addGap(100)
+					.addComponent(lblNewLabel, GroupLayout.PREFERRED_SIZE, 246, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(108, Short.MAX_VALUE))
 				.addGroup(gl_contentPanel.createSequentialGroup()
-					.addContainerGap(169, Short.MAX_VALUE)
+					.addGap(169)
 					.addComponent(lblNewLabel_1)
-					.addGap(160))
+					.addContainerGap(181, Short.MAX_VALUE))
 				.addGroup(gl_contentPanel.createSequentialGroup()
-					.addContainerGap(192, Short.MAX_VALUE)
+					.addGap(190)
 					.addComponent(ver, GroupLayout.PREFERRED_SIZE, 69, GroupLayout.PREFERRED_SIZE)
-					.addGap(179))
+					.addContainerGap(195, Short.MAX_VALUE))
+				.addGroup(gl_contentPanel.createSequentialGroup()
+					.addGap(146)
+					.addGroup(gl_contentPanel.createParallelGroup(Alignment.LEADING)
+						.addComponent(lblNewLabel_2)
+						.addComponent(label))
+					.addGap(148))
 		);
 		gl_contentPanel.setVerticalGroup(
 			gl_contentPanel.createParallelGroup(Alignment.LEADING)
@@ -96,17 +101,18 @@ public class About extends JDialog {
 					.addComponent(lblNewLabel)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(description, GroupLayout.PREFERRED_SIZE, 27, GroupLayout.PREFERRED_SIZE)
-					.addGap(18)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(label)
-					.addPreferredGap(ComponentPlacement.RELATED)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
 					.addComponent(lblNewLabel_1)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(ver)
-					.addContainerGap(17, Short.MAX_VALUE))
+					.addPreferredGap(ComponentPlacement.RELATED)
+					.addComponent(lblNewLabel_2)
+					.addContainerGap(37, Short.MAX_VALUE))
 		);
 		contentPanel.setLayout(gl_contentPanel);
 		setLocationRelativeTo(a);
 		setVisible(true);
 	}
-
 }

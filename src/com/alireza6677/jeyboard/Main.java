@@ -205,7 +205,7 @@ public class Main extends JFrame {
 	 * Create the frame.
 	 */
 	public Main() {
-		setTitle("alireza6677 Keyboard");
+		setTitle("JeyBoard");
 		// initTray();
 		setAlwaysOnTop(true);
 		setResizable(false);
@@ -1313,8 +1313,8 @@ public class Main extends JFrame {
 		vt.registerButton(btnoem3);
 		vt.registerButton(btn_dash);
 		vt.registerButton(btn_eq);
-		vt.register‌BracketButton(btnBracket);
-		vt.register‌Bracket1Button(btnCBracket);
+		vt.registerButton(btnBracket);
+		vt.registerButton(btnCBracket);
 		vt.registerButton(btnSemiColon);
 		vt.registerButton(btnQoute);
 		vt.registerButton(btnComma);
@@ -1377,6 +1377,7 @@ public class Main extends JFrame {
 		vt.registerMinusButton(btnMinus);
 		vt.registerDivisionButton(btnDiv);
 		vt.registerMultiplyButton(btnMult);
+		vt.registerButton(btnNumpadPoint);
 		
 		vt.setShiftChangeListener((a, b) -> {
 			if (a == ButtonStates.OFF) {
