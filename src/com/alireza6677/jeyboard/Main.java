@@ -206,7 +206,7 @@ public class Main extends JFrame {
 	 */
 	public Main() {
 		setTitle("JeyBoard");
-		// initTray();
+		initTray();
 		setAlwaysOnTop(true);
 		setResizable(false);
 		setFocusable(false);
