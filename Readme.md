@@ -1,7 +1,7 @@
 # JeyBoard
 A simple powerful virtual keyboard for any desktop operating system running java
 
-# Requiremets
+# Requirements
 Mac OS X - Gnu/Linux - Windows 7+
 
 (Java v8 is required to run JeyBoard)
